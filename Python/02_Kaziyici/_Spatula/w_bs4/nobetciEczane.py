@@ -37,6 +37,7 @@ class NobetciEczane(object):
         il      = il.translate(tr2eng)
         ilce    = ilce.translate(tr2eng)
 
+        kaynak  = "eczaneler.gen.tr" 
         url     = f"https://www.eczaneler.gen.tr/nobetci-{il}-{ilce}"
         kimlik  = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.76 Safari/537.36'}
         istek   = requests.get(url, headers=kimlik)
@@ -44,7 +45,7 @@ class NobetciEczane(object):
         corba = BeautifulSoup(istek.content, "lxml")
         bugun = corba.find('div', id='nav-bugun')
 
-        liste = []
+        json = {"kaynak": kaynak, 'veri' : []}
         try:
             for bak in bugun.findAll('tr')[1:]:
                 ad    = bak.find('span', class_='isim').text
@@ -53,7 +54,7 @@ class NobetciEczane(object):
                 tarif = None if bak.find('span', class_='text-secondary font-italic') == None else bak.find('span', class_='text-secondary font-italic').text
                 telf  = bak.find('div', class_='col-lg-3 py-lg-2').text
 
-                liste.append({
+                json['veri'].append({
                     'ad'        : ad,
                     'mahalle'   : mah,
                     'adres'     : adres,
@@ -63,26 +64,27 @@ class NobetciEczane(object):
         except AttributeError:
             pass
 
-        self.liste  = liste
+        self.json  = json if json['veri'] != [] else None
 
     def veri(self):
         "json verisi döndürür."
-        return self.liste or None
+        return self.json or None
 
     def gorsel(self):
         "oluşan json verisini insanın okuyabileceği formatta döndürür."
-        return json.dumps(self.liste, indent=2, sort_keys=False, ensure_ascii=False) if self.liste else None
+        return json.dumps(self.json, indent=2, sort_keys=False, ensure_ascii=False) if self.json else None
 
     def tablo(self):
         "tabulate verisi döndürür."
-        return tabulate(self.liste, headers='keys', tablefmt='psql') or None
+        return tabulate(self.json['veri'], headers='keys', tablefmt='psql') if self.json else None
 
     def anahtarlar(self):
         "kullanılan anahtar listesini döndürür."
-        return [anahtar for anahtar in self.liste[0].keys()] if self.liste else None
+        return [anahtar for anahtar in self.json['veri'][0].keys()] if self.json else None
 
 #bakalim = NobetciEczane("İstanbul", "Beylikdüzü")
 
+#print(bakalim.json)
 #print(bakalim.veri())
 #print(bakalim.gorsel())
 #print(bakalim.tablo())
