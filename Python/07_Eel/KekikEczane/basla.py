@@ -8,14 +8,14 @@ def py_eczane(il, ilce):
     mesaj = f"Aranan Nöbetçi Eczane : {ilce} / {il}\n"
     eczaneler = NobetciEczane(il, ilce).veri()['veri']
     for eczane in eczaneler:
-        mesaj += f"\n\t⚕ {eczane['ad']}"
+        mesaj += f"\n⚕ {eczane['ad']}"
         mesaj += "\n📍"
         if eczane['mahalle']:
             mesaj += f"`{eczane['mahalle']}`\n"
         mesaj += f"{eczane['adres']}"
         if eczane['tarif']:
             mesaj += f"\n({eczane['tarif']})"
-        mesaj += f"\n\t☎️ {eczane['telefon']}\n\n"
+        mesaj += f"\n☎️ {eczane['telefon']}\n\n"
 
     print(mesaj)
     eel.eczaneVer(mesaj.replace("\n","<br />\n"))
